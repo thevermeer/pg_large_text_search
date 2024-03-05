@@ -46,7 +46,7 @@ BEGIN
             > (2 ^ 8 - 2))
   THEN
     -- Recur
-    RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(fragment) 
+    RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment) 
                   FROM LTSV_LARGE_TEXT_TO_INDEXABLE_FRAGMENTS(source));
   ELSE
     -- If it's already or eventually valid, return unchanged
@@ -58,7 +58,7 @@ BEGIN
 -- again
 EXCEPTION WHEN program_limit_exceeded THEN
   -- Recur
-  RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(fragment) 
+  RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment) 
                 FROM LTSV_LARGE_TEXT_TO_INDEXABLE_FRAGMENTS(source));
 END;
 $$
