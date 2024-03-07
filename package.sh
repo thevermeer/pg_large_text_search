@@ -1,10 +1,4 @@
 # The bsh script concatenates all files in the /sql directory and into a single install package
-cd 
-
-
-
-
-
 ## Input directory as ARG 1
 input_directory=$1
 
