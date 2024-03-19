@@ -13,7 +13,7 @@ consult the original text later, or want to use the built-in TS_HEADLINE, or
 eventually, TS_SEMANTIC_HEADLINE and TS_FAST HEADLINE
 */
 CREATE OR REPLACE FUNCTION LARGE_TEXT_TO_TSVECTORS
-(config REGCONFIG, source TEXT, exp_2_limit SMALLINT DEFAULT 14) 
+(config REGCONFIG, source TEXT, exp_limit INTEGER DEFAULT 14) 
 RETURNS TABLE (content_fragment TEXT) AS 
 $$
 DECLARE vector TSVECTOR = TO_TSVECTOR(config, source);
@@ -35,7 +35,7 @@ BEGIN
                                     AS lexes) 
                             AS wordplaces) 
                     AS terms)
-            > (2 ^ exp_2_limit - 2)
+            > ((2 ^ exp_limit) - 2)
             OR
             -- Prevent any specific lexeme occurring more than 255 times
             ( SELECT MAX(ARRAY_LENGTH((lex_position_arrays.words).positions, 1))
@@ -46,7 +46,7 @@ BEGIN
             > (2 ^ 8 - 2))
   THEN
     -- Recur
-    RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment) 
+    RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment, exp_limit) 
                   FROM LTSV_LARGE_TEXT_TO_INDEXABLE_FRAGMENTS(source));
   ELSE
     -- If it's already or eventually valid, return unchanged
@@ -58,7 +58,7 @@ BEGIN
 -- again
 EXCEPTION WHEN program_limit_exceeded THEN
   -- Recur
-  RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment) 
+  RETURN QUERY (SELECT LARGE_TEXT_TO_TSVECTORS(config, fragment, exp_limit) 
                 FROM LTSV_LARGE_TEXT_TO_INDEXABLE_FRAGMENTS(source));
 END;
 $$
