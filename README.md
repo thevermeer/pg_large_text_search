@@ -4,7 +4,7 @@ Herein are a few simple tools for creating a well-formed index for large documen
 ## Purpose
 Using PostgreSQL for full-text search can be fruitful, and the many built-in text search functions provide a powerful start to developing a search and recall system.
 
-That said, postgreSQL has a number of significant limitations to how it builds `TSVECTOR` lookup indexes for full-text search, and these limitations quickly emerge when indexing large text files. The notion of what makes a large text file is objectively defined my the TSVector limitations as text containing more than 16,383 (2^14 - 1) words, wshere the position ordinal in the TSVECTOR is of type `SMALLINT` and thusly limited in maximum value.
+That said, postgreSQL has a number of significant limitations to how it builds `TSVECTOR` lookup indexes for full-text search, and these limitations quickly emerge when indexing large text files. The notion of what makes a large text file is objectively defined my the TSVector limitations as text containing more than 16,383 (2^14 - 1) words, where the position ordinal in the TSVECTOR is of type `SMALLINT` and thusly limited in maximum value.
 
 ## PostgreSQL Limitiations Managed by this Extension
 Considering [[PostgreSQL Text Search Limitations](https://www.postgresql.org/docs/14/textsearch-limitations.html)], there are a few big gotchas when trying to index large text. From the manual: 
@@ -21,6 +21,11 @@ The most pressing limitations for large text indexing are:
    - The number of lexemes must be less than 264
    - Position values in tsvector must be greater than 0 and no more than 16,383
    - No more than 256 positions per lexeme
+
+## Solution
+The purpose of this library is to wrap a simple function that will accept a large body of text and divide that text into n text fragments, each of which, when rendering into a PostgreSQL `TSVector` full-text lookup vector, will produce a well-formed TSVector, ensuring that the PGSQL limnitations noted above are avoided. Likewise, in order to maintain continuity of search, and not have multiword phrases split between indices and therefore not searchable, we 'overlap' text fragments by a default 32 words. 
+
+All together, the point of doing this is to produce a complete full-text index of a large volume of text, and this makes PostgreSQL capable of supplying full-text indexing for large documents.
 
 ## Prerequisites
 - PostgreSQL@14 or greater.
