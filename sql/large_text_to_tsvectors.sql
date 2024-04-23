@@ -1,3 +1,6 @@
+-- Drop the old 2-arity definition if a prior extension version was used
+DROP FUNCTION LARGE_TEXT_TO_TSVECTORS(REGCONFIG, TEXT);
+
 /* function: LARGE_TEXT_TO_TSVECTORS
 
 Separate long strings into smaller strings, each of which will parse to 
